@@ -1,15 +1,18 @@
 export default async function handler(req, res) {
-  try {
-    const response = await fetch(
-      "https://cricket-api.vercel.app/matches"
-    );
-
-    const data = await response.json();
-
-    res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json({
-      error: "Failed to fetch schedule"
-    });
-  }
+  res.status(200).json({
+    success: true,
+    type: "schedule",
+    matches: [
+      {
+        match: "IND vs AUS",
+        date: "31 May 2026",
+        time: "7:30 PM"
+      },
+      {
+        match: "RCB vs CSK",
+        date: "1 June 2026",
+        time: "8:00 PM"
+      }
+    ]
+  });
 }
