@@ -13,12 +13,48 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    res.status(200).json(data);
+    let matches = [];
+
+    data.typeMatches.forEach(type => {
+      type.seriesMatches.forEach(series => {
+
+        if (series.seriesAdWrapper) {
+
+          series.seriesAdWrapper.matches.forEach(match => {
+
+            matches.push({
+              series: match.matchInfo.seriesName,
+              match: `${match.matchInfo.team1.teamSName} vs ${match.matchInfo.team2.teamSName}`,
+              status: match.matchInfo.status,
+              format: match.matchInfo.matchFormat,
+              venue: match.matchInfo.venueInfo.ground,
+
+              score1: match.matchScore?.team1Score?.inngs1?.runs || 0,
+              wickets1: match.matchScore?.team1Score?.inngs1?.wickets || 0,
+
+              score2: match.matchScore?.team2Score?.inngs1?.runs || 0,
+              wickets2: match.matchScore?.team2Score?.inngs1?.wickets || 0
+            });
+
+          });
+
+        }
+
+      });
+    });
+
+    res.status(200).json({
+      success: true,
+      total: matches.length,
+      matches
+    });
 
   } catch (error) {
+
     res.status(500).json({
-      error: "Failed to fetch live cricket data",
+      error: "Failed to fetch live data",
       details: error.toString()
     });
+
   }
 }
