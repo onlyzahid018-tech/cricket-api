@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   try {
     const response = await fetch(
-      "https://api.cricapi.com/v1/currentMatches?apikey=DEMO_KEY&offset=0"
+      "https://cricket-api.vercel.app/matches"
     );
 
     const data = await response.json();
