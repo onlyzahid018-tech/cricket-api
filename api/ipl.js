@@ -1,6 +1,5 @@
 export default async function handler(req, res) {
   try {
-
     const response = await fetch(
       "https://cricbuzz-cricket.p.rapidapi.com/matches/v1/live",
       {
@@ -13,47 +12,58 @@ export default async function handler(req, res) {
     );
 
     const data = await response.json();
+    const matches = [];
 
-    let matches = [];
-
-    data.typeMatches.forEach(type => {
-
-      type.seriesMatches.forEach(series => {
+    data.typeMatches?.forEach(type => {
+      type.seriesMatches?.forEach(series => {
+        const wrapper = series.seriesAdWrapper;
 
         if (
-          series.seriesAdWrapper &&
-          series.seriesAdWrapper.seriesName.includes("Indian Premier League")
+          wrapper &&
+          wrapper.seriesName &&
+          wrapper.seriesName.includes("Indian Premier League")
         ) {
-
-          series.seriesAdWrapper.matches.forEach(match => {
-
+          wrapper.matches?.forEach(match => {
             matches.push({
-              match: `${match.matchInfo.team1.teamSName} vs ${match.matchInfo.team2.teamSName}`,
+              series: wrapper.seriesName,
+              team1: match.matchInfo.team1.teamName,
+              team2: match.matchInfo.team2.teamName,
+              team1Short: match.matchInfo.team1.teamSName,
+              team2Short: match.matchInfo.team2.teamSName,
               status: match.matchInfo.status,
               venue: match.matchInfo.venueInfo.ground,
+              city: match.matchInfo.venueInfo.city,
+              format: match.matchInfo.matchFormat,
 
-              score1: match.matchScore?.team1Score?.inngs1?.runs || 0,
-              score2: match.matchScore?.team2Score?.inngs1?.runs || 0
+              team1Score:
+                match.matchScore?.team1Score?.inngs1?.runs || 0,
+              team1Wickets:
+                match.matchScore?.team1Score?.inngs1?.wickets || 0,
+              team1Overs:
+                match.matchScore?.team1Score?.inngs1?.overs || 0,
+
+              team2Score:
+                match.matchScore?.team2Score?.inngs1?.runs || 0,
+              team2Wickets:
+                match.matchScore?.team2Score?.inngs1?.wickets || 0,
+              team2Overs:
+                match.matchScore?.team2Score?.inngs1?.overs || 0
             });
-
           });
-
         }
-
       });
-
     });
 
     res.status(200).json({
       success: true,
+      total: matches.length,
       matches
     });
 
   } catch (error) {
-
     res.status(500).json({
-      error: "Failed to fetch IPL data"
+      success: false,
+      error: error.message
     });
-
   }
 }
